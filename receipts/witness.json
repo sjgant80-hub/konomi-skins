@@ -1,0 +1,24 @@
+{
+ "kind": "konomi-skins.witness",
+ "v": 1,
+ "witness": {
+  "tag": "v0.6",
+  "commit": "f04fe3047e3d49b98c67713befd5b77182afa0d4",
+  "sha256": "9918297aa5f8fc4e1d26d9e6b25226f56102fdc04f0c634155bfcba1c086ef48"
+ },
+ "kernel": "kernel.mjs",
+ "kernelSha256": "648635cf2ed71393cb84b267fa3533b53a79dacbee892179b26b7e85cd56db2a",
+ "tests": "node --test kernel.test.mjs",
+ "testsSha256": "9d0221370798a4382d267b97fe5d585f1276d209d49d5f600eaa2871d1783a57",
+ "node": "v25.7.0",
+ "platform": "win32",
+ "total": 87,
+ "killed": 87,
+ "survived": [],
+ "ignored": [],
+ "capped": false,
+ "timeoutMs": 60000,
+ "clean": true,
+ "seconds": 520,
+ "rerun": "git clone https://github.com/sjgant80-hub/witness && git -C witness checkout v0.6 && node gate.mjs --witness witness/witness.mjs"
+}

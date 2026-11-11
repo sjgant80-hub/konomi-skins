@@ -305,6 +305,19 @@
     <p class="lead">Structure is built by <strong>Konomi</strong> — a semantic-schema system for describing what a UI is, independent of how it looks (concept by Thomas Frumkin). Everything below runs locally: no network calls, no accounts, nothing leaves this page.</p>
   </div>
 
+
+  <section id="start"><h3>Start here <small>what to do on this page</small></h3><div class="card ex">
+    <p><b>Konomi Skins shows one idea working:</b> describe what an app <i>is</i> once, its STRUCTURE, and let anyone dress it in their own SKIN, a small JSON file of colours, fonts and layout. The RENDERER draws the two together, and it always draws: whatever a skin lacks, or gives in a form it cannot use, comes from the base skin.</p>
+    <ol>
+      <li>Pick a skin in the <b>Skin gallery</b>. The same app below re-renders in that face.</li>
+      <li>Change the accent, density or mode, then <b>Export current skin</b>: it is yours, as a file.</li>
+      <li><b>Import skin</b> to try someone else's. It is fitted onto the base first, and the page says how many of its tokens came from the base.</li>
+      <li>Edit the <b>Structure</b> JSON and re-render: every skin follows.</li>
+      <li><b>Re-run self-test</b>: for every component type it removes the skin's mapping, all of its tokens, and plants a colour that would load a URL, and checks the component still renders, with no URL in its style.</li>
+    </ol>
+    <p>Below the demo: <a href="#how">how it works</a> · <a href="#ex-words">words on this page</a> · <a href="#blueprint">blueprint</a> · <a href="#adoption">roll it out</a> · <a href="#business">for a business</a> · <a href="#ex-faq">FAQ</a></p>
+  </div></section>
+
   <section id="explainer">
     <h3>Explainer <small>structure, skin, renderer — in plain terms</small></h3>
     <div class="explain-cols">
@@ -321,7 +334,7 @@
       <div class="card">
         <div class="kicker">Renderer</div>
         <h4>What makes it real</h4>
-        <p>Takes a structure and a skin, looks up each component's type in the skin's component-map, and renders that variant with the skin's tokens and layout. If a skin doesn't define a type, the renderer falls back to the base skin's rendering of that type — restyled, never removed.</p>
+        <p>Takes a structure and a skin, looks up each component's type in the skin's component-map, and renders that variant with the skin's tokens and layout. If a skin doesn't define a type, the renderer falls back to the base skin's rendering of that type — restyled, never removed. The same holds for every token: before a skin is drawn it is fitted onto the base, so a colour, font, size or shadow it lacks, or gives in a form the renderer cannot use, comes from the base.</p>
       </div>
     </div>
   </section>
@@ -403,10 +416,105 @@
         <li>Layout arrangement follows a skin's declared panel order and nav style; it does not do general-purpose constraint layout or resize components to fit arbitrary content.</li>
         <li>The conversation panel's replies are scripted demo text, not a live model — there is no backend here at all, by design.</li>
         <li>Tweaking the accent color does not recompute a matching accent-text contrast color; very light or dark custom accents can reduce readability.</li>
-        <li>Imported skins are trusted as data (tokens/layout/component-map only) and are not validated against a full schema — malformed values may render oddly rather than being rejected outright.</li>
+        <li>An imported skin is fitted onto the base before it is used. Each token must look like its kind (a colour like a colour, a size like a size) and must not be able to load anything from outside the page (a <code>url(…)</code>, an <code>@import</code>, an escape); anything else comes from the base, and the page says how many tokens did. Version 1 trusted imported tokens as they were: a skin with missing token groups stopped the page rendering, and a colour set to <code>url(…)</code> made the page fetch from that address. A structure whose components refer to each other in a loop is drawn once per component.</li>
       </ul>
     </div>
   </section>
+
+  <section id="how"><h3>How it works <small>from a skin to a rendered app</small></h3><div class="card ex">
+    <svg class="ex-svg" viewBox="0 0 646 98" role="img" aria-label="STRUCTURE what the app is, then SKIN yours, or imported, then fitted onto the base skin, then RENDERER always draws"><rect x="6" y="12" width="144" height="74" rx="8" class="ex-b"/><text x="78" y="42" text-anchor="middle" class="ex-t">STRUCTURE</text><text x="78" y="56" text-anchor="middle" class="ex-s">what the app is</text><line x1="150" y1="49" x2="166" y2="49" class="ex-l"/><rect x="166" y="12" width="144" height="74" rx="8" class="ex-b"/><text x="238" y="42" text-anchor="middle" class="ex-t">SKIN</text><text x="238" y="56" text-anchor="middle" class="ex-s">yours, or imported</text><line x1="310" y1="49" x2="326" y2="49" class="ex-l"/><rect x="326" y="12" width="144" height="74" rx="8" class="ex-b"/><text x="398" y="42" text-anchor="middle" class="ex-t">fitted onto</text><text x="398" y="56" text-anchor="middle" class="ex-s">the base skin</text><line x1="470" y1="49" x2="486" y2="49" class="ex-l"/><rect x="486" y="12" width="144" height="74" rx="8" class="ex-b"/><text x="558" y="42" text-anchor="middle" class="ex-t">RENDERER</text><text x="558" y="56" text-anchor="middle" class="ex-s">always draws</text></svg>
+    <ol>
+      <li><b>The structure</b> lists the app's components (navigation, conversation, data view, panel grid, form), how they nest, and the flows between them: no colour, no layout.</li>
+      <li><b>The skin</b> is JSON: tokens (colours for light and dark, font, spacing, radii, shadows, motion), a layout (mode, density, navigation style, panel order) and, for each component type, which variant to draw it with.</li>
+      <li><b>Fitting.</b> Before anything is drawn, the skin is fitted onto the base skin, token by token. A token is used only if it looks like its kind and cannot load anything from outside the page; otherwise the base's value is. A variant the renderer does not have becomes the base's variant.</li>
+      <li><b>The renderer</b> walks the structure from its root, visiting each component once, and draws each one with the fitted skin. So every skin, including one written by a stranger, renders the whole app.</li>
+    </ol>
+  </div></section>
+
+  <section id="ex-words"><h3>Words on this page</h3><div class="card ex"><dl>
+    <dt><b>Structure</b></dt><dd>What an app is, as data: its components, how they nest, what each one binds to, and the flows between them.</dd>
+    <dt><b>Skin</b></dt><dd>How it looks, as a portable JSON file you can keep, share and import.</dd>
+    <dt><b>Token</b></dt><dd>One design value in a skin: a colour, a font, a size, a shadow, a speed.</dd>
+    <dt><b>Variant</b></dt><dd>One way to draw a component type: navigation as a sidebar, a top bar, a dock or a command palette, for example.</dd>
+    <dt><b>Base skin</b></dt><dd>The floor every fallback lands on. It defines every token and a variant for every type.</dd>
+    <dt><b>Fitting</b></dt><dd>Checking a skin token by token against the base before it is drawn, and taking the base's value for anything missing or unusable.</dd>
+    <dt><b>Kernel</b></dt><dd>The small piece of code that holds the base skin, the variants and the fitting rules. It is a block inside this page, copied byte for byte into <code>kernel.mjs</code> (the file the tests run).</dd>
+    <dt><b>Mutation gate</b></dt><dd>A test of the tests. <a href="https://github.com/sjgant80-hub/witness">witness</a> makes small deliberate changes to the kernel, one at a time: for example it turns <code>weight &lt;= 900</code> into <code>weight &lt; 900</code>, then runs the tests. Every change must make a test fail; a change no test notices has <i>survived</i>.</dd>
+    <dt><b>CI</b></dt><dd>Continuous integration: GitHub re-runs every test and both gates on its own computers on every change, and the runs are public.</dd>
+    <dt><b>MIT licence</b></dt><dd>An open-source licence: you may use, copy, change and build products with it, free, as long as the copyright notice stays.</dd>
+  </dl></div></section>
+
+  <section id="blueprint"><h3>Blueprint <small>how it is built</small></h3><div class="card ex"><ul>
+    <li><b>One file.</b> The whole demo is this page: no build step to run it, no server, no network call.</li>
+    <li><b>The kernel.</b> The base skin, the variants and the fitting rules are the KERNEL block inside this page. <code>build.mjs</code> copies it byte for byte into <code>kernel.mjs</code>, and CI fails if the two ever differ, so the page runs the tested code.</li>
+    <li><b>Tests.</b> <code>kernel.test.mjs</code> pins each token rule at its edge, the fallback for every token, that the five built-in skins fit with nothing replaced, and that a looped or 100,000-deep structure is walked safely.</li>
+    <li><b>Mutation gate.</b> witness makes one small change to the kernel at a time and re-runs the tests; every change must make a test fail, which proves the tests check each of those points. From <a href="receipts/witness.json">receipts/witness.json</a>: <span id="ex-gate">reading the receipt…</span></li>
+    <li><b>The cost case below</b> is calculated by a separate small piece of code, <code>skincase.mjs</code>, tested and mutation-gated the same way, in its own CI job. The gate line and the wage are embedded in the page by <code>build.mjs</code>, so the page still makes no network call.</li>
+    <li><b>CI</b> re-runs all of it on GitHub's computers on every change: <a href="https://github.com/sjgant80-hub/konomi-skins/actions">every run, in public</a>.</li>
+  </ul></div></section>
+
+  <section id="adoption"><h3>Roll it out <small>using the split in a real product</small></h3><div class="card ex"><ol>
+    <li><b>Pick one product</b> that has to wear more than one face: white-label versions for clients, a brand refresh, a high-contrast mode.</li>
+    <li><b>Describe it as a structure</b>: its components and flows, with no styling. This is the one-off work the cost case counts.</li>
+    <li><b>Write the base skin</b> with every token and a variant for every component type: it is what every other skin falls back to.</li>
+    <li><b>Give each brand a skin file.</b> Anything a skin leaves out comes from the base, so a brand only writes what it changes.</li>
+    <li><b>Fit before you draw.</b> Run every skin through the fitting rules before rendering, so a skin from outside can neither break the page nor make it load anything.</li>
+  </ol></div></section>
+
+  <section id="business"><h3>For a business <small>the case, for each role</small></h3><div class="card ex">
+    <p>Konomi Skins is a working demonstration of a way to build interfaces: one structure, many faces, a renderer that never drops a component. It is not a finished design system; it shows the split working on five component types and five skins.</p>
+    <ul>
+      <li><b>CEO.</b> One product can wear each client's brand without a separate build per client.</li>
+      <li><b>CFO.</b> Restyling becomes writing a small file; the case below works out what that is worth on your numbers, and counts the one-off work of the split. MIT, no licence fee.</li>
+      <li><b>COO.</b> A new brand is a file to review, not a release to schedule.</li>
+      <li><b>CTO / CISO.</b> A skin from outside is fitted before it is drawn: it cannot remove a component, break the page, or make it load anything. The fitting rules are a tested, mutation-gated kernel.</li>
+      <li><b>Legal and compliance.</b> A skin carries no code, only values checked against rules, so accepting one from a client does not run their code.</li>
+      <li><b>The teams.</b> Designers own the skin, engineers own the structure, and neither breaks the other.</li>
+    </ul>
+    <h4>The cost case, on your numbers</h4>
+    <p>By hand: brands a year × hours to restyle the product for one brand × the UK median hourly wage. With skins: brands × the minutes to write one skin, plus the hours to split the product into structure and skins once, in year one. Staff time leaves on-costs out, so this is a floor. Change any box and the table recalculates as you type.</p>
+    <div class="ex-form">
+      <label>Brands or clients a year<input type="number" id="sc-brands" min="0" step="1" value="4"></label>
+      <label>Hours to restyle the product for one, by hand<input type="number" id="sc-hours" min="0" step="1" value="40"></label>
+      <label>Minutes to write one skin<input type="number" id="sc-minutes" min="0" step="5" value="60"></label>
+      <label>Hours to split the product into structure and skins, once<input type="number" id="sc-split" min="0" step="5" value="80"></label>
+      <label>Years<input type="number" id="sc-years" min="1" max="10" step="1" value="3"></label>
+    </div>
+    <p id="sc-why" role="alert"></p>
+    <p class="big" id="sc-big"></p>
+    <div class="ex-wrap"><table><thead><tr><th>year</th><th>by hand</th><th>with skins</th><th>saved</th></tr></thead><tbody id="sc-rows"></tbody></table></div>
+    <p id="sc-sources"></p>
+    <h4>Against what you do now</h4>
+    <ul>
+      <li><b>A fork per client.</b> Every fix is made once per fork, and the forks drift apart.</li>
+      <li><b>A theme file of CSS variables.</b> It recolours, but a missing variable breaks the look, and nothing stops a value that loads an outside resource.</li>
+      <li><b>A design system.</b> The right answer at scale; this is the same split, small enough to read in an afternoon.</li>
+    </ul>
+    <h4>Security, data protection and deployment</h4>
+    <ul>
+      <li>The page runs entirely in your browser and makes no network call; nothing you edit or import is sent anywhere.</li>
+      <li>An imported skin is data, never code: each value is checked against its kind, and anything that could load a resource is refused.</li>
+      <li>Serve it from GitHub Pages or your own intranet, unchanged.</li>
+    </ul>
+    <h4>Support and ownership</h4>
+    <p>Supplied by <a href="https://www.ai-nativesolutions.com">AI Native Solutions</a>; start through that site. Support, any service level, warranty and liability are agreed per deployment, in each deployment's agreement. The software is MIT and keeps running without us. The structure concept is Konomi, by Thomas Frumkin.</p>
+    <h4>Where it stops, answered straight</h4>
+    <ul>
+      <li><b>A demonstration, not a design system:</b> 5 component types, a few variants each, 5 skins.</li>
+      <li><b>A fallback keeps a component working;</b> it does not guarantee it looks intentional next to a very different skin.</li>
+      <li><b>No contrast check.</b> A custom accent is not checked for readable contrast.</li>
+      <li><b>No layout engine.</b> It follows a skin's panel order and navigation style; it does not lay out arbitrary content.</li>
+    </ul>
+    <h4>The case for the board</h4>
+    <p>Build the product once and let each client's brand be a file, checked before it is drawn, that can neither remove a feature nor reach outside the page. The rules that guarantee it are tested, and their tests tested.</p>
+  </div></section>
+
+  <section id="ex-faq"><h3>FAQ</h3><div class="card ex"><dl>
+    <dt><b>What happens to a skin I import?</b></dt><dd>It is fitted onto the base: each token is checked against its kind, and anything missing, malformed or able to load something comes from the base. The page tells you how many tokens did. Nothing is sent anywhere.</dd>
+    <dt><b>Can a skin remove a feature?</b></dt><dd>No. A component type the skin does not map, or maps to a variant the renderer does not have, is drawn with the base skin's variant.</dd>
+    <dt><b>What if my structure has a mistake?</b></dt><dd>It must have a root and a list of components. A component of a type the renderer does not know is skipped; components that refer to each other in a loop are each drawn once.</dd>
+    <dt><b>Does it need the internet or an account?</b></dt><dd>No. The page works once loaded and makes no network call.</dd>
+  </dl></div></section>
 
 </main>
 
@@ -446,8 +554,6 @@
     });
     return node;
   }
-  function clone(o){ return JSON.parse(JSON.stringify(o)); }
-  function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
   /* ============================== Sample structure ============================== */
   var SAMPLE_STRUCTURE = {
@@ -512,28 +618,202 @@
   };
 
   /* ============================== Skins (portable JSON) ============================== */
-  function baseColorTokens(){
-    return {
-      light: { bg:"#ffffff", surface:"#f7f6f3", surfaceAlt:"#eeece6", text:"#1c1a17", textMuted:"#6b6558", accent:"#3a6ea5", accentText:"#ffffff", border:"#dedad0", success:"#2f8f4e", danger:"#c0392b" },
-      dark:  { bg:"#15161a", surface:"#1d1e24", surfaceAlt:"#262832", text:"#eceef2", textMuted:"#9aa0ad", accent:"#6fa8dc", accentText:"#0d1117", border:"#333644", success:"#5fce87", danger:"#e08a7d" }
-    };
-  }
+/* ==== KERNEL:BEGIN — Konomi Skins' fitting rules; build.mjs copies this block byte for byte into kernel.mjs (tested, mutation-gated) ==== */
+// The base skin, the variants each component type has, and the rules that fit any skin (one of ours, or a stranger's
+// imported JSON) onto the base: the renderer always gets every token it reads, and no token can reach outside the
+// page. The page calls this same code. No DOM, no network, no clock.
+// a deep copy of plain data; null for anything JSON cannot copy (undefined, a function, a loop, a BigInt)
+function clone(o){ try { return JSON.parse(JSON.stringify(o)); } catch (e) { return null; } }
+// n kept between a and b; NaN unless all three are numbers
+function clamp(n, a, b){ return typeof n === "number" && typeof a === "number" && typeof b === "number" ? Math.max(a, Math.min(b, n)) : NaN; }
+var has = function(o, k){ return !!o && typeof o === "object" && Object.prototype.hasOwnProperty.call(o, k); };
+// o's own value at k, or undefined: every read of a skin goes through here, so a skin of any shape is safe to read
+var get = function(o, k){ return has(o, k) ? o[k] : undefined; };
 
-  var BASE_SKIN = {
-    id: "base", name: "Base", isBase: true,
-    description: "The always-renders floor. Every fallback in this demo lands here.",
-    tokens: {
-      color: baseColorTokens(),
-      font: { family: "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif", size: "15px", headingWeight: 700 },
-      spacing: { unit: 8 },
-      radius: { sm: "4px", md: "8px", lg: "14px" },
-      elevation: { sm: "0 1px 2px rgba(20,20,20,0.08)", md: "0 4px 14px rgba(20,20,20,0.14)" },
-      motion: { speed: "150ms", easing: "ease" }
-    },
-    layout: { mode: "light", density: "comfortable", navStyle: "sidebar",
-      panelOrder: ["stats-grid", "activity-graph", "support-chat", "contact-form"] },
-    componentMap: { "navigation": "sidebar", "conversation": "bubbles", "data-view": "list", "panel-grid": "grid", "form": "stacked" }
+function baseColorTokens(){
+  return {
+    light: { bg:"#ffffff", surface:"#f7f6f3", surfaceAlt:"#eeece6", text:"#1c1a17", textMuted:"#6b6558", accent:"#3a6ea5", accentText:"#ffffff", border:"#dedad0", success:"#2f8f4e", danger:"#c0392b" },
+    dark:  { bg:"#15161a", surface:"#1d1e24", surfaceAlt:"#262832", text:"#eceef2", textMuted:"#9aa0ad", accent:"#6fa8dc", accentText:"#0d1117", border:"#333644", success:"#5fce87", danger:"#e08a7d" }
   };
+}
+
+var BASE_SKIN = {
+  id: "base", name: "Base", isBase: true,
+  description: "The always-renders floor. Every fallback in this demo lands here.",
+  tokens: {
+    color: baseColorTokens(),
+    font: { family: "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif", size: "15px", headingWeight: 700 },
+    spacing: { unit: 8 },
+    radius: { sm: "4px", md: "8px", lg: "14px" },
+    elevation: { sm: "0 1px 2px rgba(20,20,20,0.08)", md: "0 4px 14px rgba(20,20,20,0.14)" },
+    motion: { speed: "150ms", easing: "ease" }
+  },
+  layout: { mode: "light", density: "comfortable", navStyle: "sidebar",
+    panelOrder: ["stats-grid", "activity-graph", "support-chat", "contact-form"] },
+  componentMap: { "navigation": "sidebar", "conversation": "bubbles", "data-view": "list", "panel-grid": "grid", "form": "stacked" }
+};
+
+// the variants the page's renderer registry has for each component type (the page's self-test checks the two agree)
+var VARIANTS = {
+  "navigation": ["sidebar", "topbar", "dock", "command-k"],
+  "conversation": ["bubbles", "terminal", "cards"],
+  "data-view": ["list", "bars", "radial", "tree"],
+  "panel-grid": ["grid", "bento", "masonry", "stack"],
+  "form": ["stacked", "inline", "card"]
+};
+var DENSITIES = ["compact", "comfortable", "spacious"];
+
+// What each token may look like. A value that does not match, or that could make the page load anything ("url(",
+// "@import", "image(", "expression", a backslash escape), is not used: the base skin's value is.
+var TOKEN_RULES = {
+  color: /^(#[0-9a-fA-F]{3,8}|(rgb|rgba|hsl|hsla)\([0-9.,%\s\/]+\)|[a-zA-Z]{3,20})$/,
+  length: /^\d+(\.\d+)?(px|rem|em|%)$/,
+  shadow: /^(none|[0-9a-zA-Z.,%#()\s\/-]+)$/,
+  family: /^[a-zA-Z0-9 ,'"-]+$/,
+  time: /^\d+(\.\d+)?m?s$/,
+  easing: /^(ease|ease-in|ease-out|ease-in-out|linear|cubic-bezier\([0-9.,\s-]+\))$/
+};
+var LOADS = /url\(|image\(|image-set\(|@import|expression|\\/i;
+function tokenOk(value, rule){
+  if (!has(TOKEN_RULES, rule) || typeof value !== "string" || value.length > 120 || LOADS.test(value)) return false;
+  return TOKEN_RULES[rule].test(value.trim());
+}
+
+// Fit any skin onto the base. Every token group and key the renderer reads is there: from the skin when it is well
+// formed, from the base when it is missing or unusable. It never throws; fellBack lists each token that came from
+// the base, so the page can say so.
+function fitSkin(skin){
+  try { return fitOnto(skin); } catch (e) { return fitOnto({}); }   // a skin whose reading throws is a skin that gives nothing
+// (fitOnto is inside fitSkin: it may throw on a hostile skin, and only fitSkin is the promise)
+  function fitOnto(s){
+  var t = get(s, "tokens"), B = BASE_SKIN.tokens, fell = [];
+  function pick(group, key, rule){
+    var v = get(get(t, group), key);
+    if (tokenOk(v, rule)) return v.trim();
+    fell.push(group + "." + key);
+    return B[group][key];
+  }
+  function colorsFor(mode){
+    var c = get(t, "color");
+    var src = get(c, mode) || get(c, "light") || get(c, "dark");
+    var out = {};
+    Object.keys(B.color[mode]).forEach(function(k){
+      var v = get(src, k);
+      if (tokenOk(v, "color")) out[k] = v.trim();
+      else { fell.push("color." + mode + "." + k); out[k] = B.color[mode][k]; }
+    });
+    return out;
+  }
+  var weight = get(get(t, "font"), "headingWeight");
+  var weightOk = typeof weight === "number" && weight >= 100 && weight <= 900 && weight % 100 === 0;
+  if (!weightOk) fell.push("font.headingWeight");
+  var unit = get(get(t, "spacing"), "unit");
+  var unitOk = typeof unit === "number" && unit >= 1 && unit <= 64;
+  if (!unitOk) fell.push("spacing.unit");
+  var L = get(s, "layout"), mode = get(L, "mode"), density = get(L, "density"), nav = get(L, "navStyle"), order = get(L, "panelOrder");
+  var cm = get(s, "componentMap"), map = {};
+  Object.keys(VARIANTS).forEach(function(type){ var v = get(cm, type); if (typeof v === "string") map[type] = v; });
+  var id = get(s, "id"), name = get(s, "name"), description = get(s, "description");
+  return {
+    id: typeof id === "string" && /^[a-zA-Z0-9-]{1,40}$/.test(id) ? id : null,
+    name: typeof name === "string" && name.trim() && name.length <= 60 ? name.trim() : "Unnamed skin",
+    description: typeof description === "string" && description.length <= 300 ? description : "",
+    isBase: get(s, "isBase") === true,
+    tokens: {
+      color: { light: colorsFor("light"), dark: colorsFor("dark") },
+      font: { family: pick("font", "family", "family"), size: pick("font", "size", "length"), headingWeight: weightOk ? weight : B.font.headingWeight },
+      spacing: { unit: unitOk ? unit : B.spacing.unit },
+      radius: { sm: pick("radius", "sm", "length"), md: pick("radius", "md", "length"), lg: pick("radius", "lg", "length") },
+      elevation: { sm: pick("elevation", "sm", "shadow"), md: pick("elevation", "md", "shadow") },
+      motion: { speed: pick("motion", "speed", "time"), easing: pick("motion", "easing", "easing") }
+    },
+    layout: {
+      mode: mode === "light" || mode === "dark" ? mode : BASE_SKIN.layout.mode,
+      density: DENSITIES.includes(density) ? density : BASE_SKIN.layout.density,
+      navStyle: VARIANTS.navigation.includes(nav) ? nav : BASE_SKIN.layout.navStyle,
+      panelOrder: Array.isArray(order) ? order.filter(function(x){ return typeof x === "string"; }) : []
+    },
+    componentMap: map,
+    fellBack: fell
+  };
+}
+
+}
+// The skin the renderer uses: the fitted skin with the page's tweaks (mode, density, accent) on top.
+function effectiveSkin(skin, tweaks){
+  var eff = fitSkin(skin);
+  var twMode, twDensity, twAccent;   // tweaks that cannot be read are no tweaks
+  try { twMode = get(tweaks, "mode"); twDensity = get(tweaks, "density"); twAccent = get(tweaks, "accent"); } catch (e) { twMode = twDensity = twAccent = undefined; }
+  var mode = twMode === "light" || twMode === "dark" ? twMode : eff.layout.mode;
+  var flat = clone(eff.tokens.color[mode]);
+  if (tokenOk(twAccent, "color")) flat.accent = twAccent.trim();
+  eff.layout.mode = mode;
+  if (DENSITIES.includes(twDensity)) eff.layout.density = twDensity;
+  eff.resolvedColor = flat;
+  return eff;
+}
+
+// The variant to draw a component type with: the skin's, when the renderer has it; otherwise the base skin's.
+function resolveVariant(type, skin){
+  var t = typeof type === "string" ? type : "";
+  var asked = get(get(skin, "componentMap"), t), requested = typeof asked === "string" ? asked : null;
+  if (requested && has(VARIANTS, t) && VARIANTS[t].includes(requested)) return { variant: requested, fallback: false, requested: requested };
+  return { variant: has(BASE_SKIN.componentMap, t) ? BASE_SKIN.componentMap[t] : null, fallback: true, requested: requested };
+}
+
+function densityScale(density){
+  if (density === "compact") return 0.7;
+  if (density === "spacious") return 1.5;
+  return 1;
+}
+
+// The structure's components in reading order from its root. Each id is visited once, so a cycle cannot loop, and
+// the walk keeps its own stack, so a very deep structure cannot overflow.
+function collectComponents(structure){
+  var byId = Object.create(null), seen = Object.create(null), order = [], navComponent = null;
+  var comps = structure && Array.isArray(structure.components) ? structure.components : [];
+  comps.forEach(function(c){ if (c && typeof c === "object" && typeof c.id === "string") byId[c.id] = c; });
+  var stack = [structure && structure.root];
+  while (stack.length) {
+    var id = stack.pop();
+    if (typeof id !== "string" || seen[id] || !byId[id]) continue;
+    seen[id] = true;
+    var c = byId[id];
+    if (c.type === "navigation" && !navComponent) navComponent = c;
+    else if (has(VARIANTS, c.type)) order.push(c);
+    // children go on the stack last-first, so the first child is visited next
+    (Array.isArray(c.children) ? c.children.slice().reverse() : []).forEach(function(k){ stack.push(k); });
+  }
+  return { byId: byId, navComponent: navComponent, contentComponents: order };
+}
+
+// The skin's panel order first, then every other component in its own order.
+function orderContent(components, panelOrder){
+  var list = Array.isArray(components) ? components : [];
+  if (!Array.isArray(panelOrder) || !panelOrder.length) return list;
+  var byId = Object.create(null), used = Object.create(null), ordered = [];
+  list.forEach(function(c){ if (c && typeof c.id === "string") byId[c.id] = c; });
+  panelOrder.forEach(function(id){ if (typeof id === "string" && byId[id] && !used[id]) { ordered.push(byId[id]); used[id] = true; } });
+  list.forEach(function(c){ if (!(c && typeof c.id === "string" && used[c.id])) ordered.push(c); });
+  return ordered;
+}
+
+function findFlow(structure, fromId, event){
+  var flows = structure && Array.isArray(structure.flows) ? structure.flows : [];
+  return flows.find(function(f){ return f && f.from === fromId && f.event === event; }) || null;
+}
+
+function appendMessageTo(structure, convoId, message){
+  var comps = structure && Array.isArray(structure.components) ? structure.components : [];
+  var comp = null;
+  comps.forEach(function(c){ if (c && c.id === convoId && c.type === "conversation") comp = c; });
+  if (!comp) return false;
+  comp.props = comp.props && typeof comp.props === "object" ? comp.props : {};
+  comp.props.messages = Array.isArray(comp.props.messages) ? comp.props.messages : [];
+  comp.props.messages.push(message);
+  return true;
+}
+/* ==== KERNEL:END ==== */
 
   var MINIMAL_SKIN = {
     id: "minimal", name: "Minimal",
@@ -628,18 +908,6 @@
     return BASE_SKIN;
   }
 
-  function effectiveSkin(skin){
-    var eff = clone(skin);
-    var mode = state.tweaks.mode || eff.layout.mode || "light";
-    var colorSet = (eff.tokens.color && (eff.tokens.color[mode] || eff.tokens.color.light || eff.tokens.color.dark)) || baseColorTokens().light;
-    var flatColor = clone(colorSet);
-    if (state.tweaks.accent){ flatColor.accent = state.tweaks.accent; }
-    eff.layout.mode = mode;
-    eff.layout.density = state.tweaks.density || eff.layout.density || "comfortable";
-    eff.resolvedColor = flatColor;
-    return eff;
-  }
-
   /* ============================== Renderer registry ============================== */
   var RENDERERS = {
     "navigation": { "sidebar": renderNavSidebar, "topbar": renderNavTopbar, "dock": renderNavDock, "command-k": renderNavCommandK },
@@ -649,69 +917,10 @@
     "form": { "stacked": renderFormStacked, "inline": renderFormInline, "card": renderFormCard }
   };
 
-  function resolveVariant(type, skin){
-    var requested = skin.componentMap && skin.componentMap[type];
-    if (requested && RENDERERS[type] && RENDERERS[type][requested]){
-      return { variant: requested, fallback: false, requested: requested };
-    }
-    var baseVariant = BASE_SKIN.componentMap[type];
-    return { variant: baseVariant, fallback: true, requested: requested || null };
-  }
-
-  function densityScale(density){
-    if (density === "compact") return 0.7;
-    if (density === "spacious") return 1.5;
-    return 1;
-  }
-
-  function collectComponents(structure){
-    var byId = {};
-    structure.components.forEach(function(c){ byId[c.id] = c; });
-    var order = [];
-    var navComponent = null;
-    function visit(id){
-      var c = byId[id];
-      if (!c) return;
-      if (c.type === "navigation" && !navComponent){ navComponent = c; }
-      else if (RENDERERS[c.type]) { order.push(c); }
-      (c.children || []).forEach(visit);
-    }
-    visit(structure.root);
-    return { byId: byId, navComponent: navComponent, contentComponents: order };
-  }
-
-  function orderContent(components, panelOrder){
-    if (!Array.isArray(panelOrder) || !panelOrder.length) return components;
-    var byId = {};
-    components.forEach(function(c){ byId[c.id] = c; });
-    var ordered = [];
-    panelOrder.forEach(function(id){ if (byId[id]){ ordered.push(byId[id]); delete byId[id]; } });
-    for (var k in byId){ if (Object.prototype.hasOwnProperty.call(byId,k)) ordered.push(byId[k]); }
-    return ordered;
-  }
-
-  function findFlow(structure, fromId, event){
-    var flows = structure.flows || [];
-    for (var i=0;i<flows.length;i++){
-      if (flows[i].from === fromId && flows[i].event === event) return flows[i];
-    }
-    return null;
-  }
-
-  function appendMessageTo(structure, convoId, message){
-    var comp = null;
-    structure.components.forEach(function(c){ if (c.id === convoId && c.type === "conversation") comp = c; });
-    if (!comp) return false;
-    comp.props = comp.props || {};
-    comp.props.messages = comp.props.messages || [];
-    comp.props.messages.push(message);
-    return true;
-  }
-
   /* ---- main render entry: structure x skin -> container ---- */
   function renderStructure(structure, rawSkin, container, opts){
     opts = opts || {};
-    var skin = effectiveSkin(rawSkin);
+    var skin = effectiveSkin(rawSkin, state.tweaks);
     var col = skin.resolvedColor;
     var t = skin.tokens;
     var scale = densityScale(skin.layout.density);
@@ -1111,7 +1320,7 @@
 
   var skinStatus = document.getElementById("skin-status");
   document.getElementById("export-skin").addEventListener("click", function(){
-    var skin = effectiveSkin(findSkin(state.selectedSkinId));
+    var skin = effectiveSkin(findSkin(state.selectedSkinId), state.tweaks);
     var exportable = clone(findSkin(state.selectedSkinId));
     if (state.tweaks.accent){
       exportable.tokens.color.light = exportable.tokens.color.light || {};
@@ -1138,12 +1347,12 @@
     var reader = new FileReader();
     reader.onload = function(){
       try {
-        var parsed = JSON.parse(String(reader.result));
-        if (!parsed.tokens || !parsed.layout || !parsed.componentMap) {
-          throw new Error("A skin needs \"tokens\", \"layout\" and \"componentMap\".");
-        }
+        var raw = JSON.parse(String(reader.result));
+        if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("A skin is a JSON object.");
+        // fitted onto the base: any token it lacks, or that could load something from outside, comes from the base
+        var parsed = fitSkin(raw);
         if (!parsed.id) parsed.id = "imported-" + Date.now();
-        if (!parsed.name) parsed.name = "Imported skin";
+        if (parsed.name === "Unnamed skin") parsed.name = "Imported skin";
         parsed.isBase = false;
         var existingIdx = skinLibrary.findIndex(function(s){ return s.id === parsed.id; });
         if (existingIdx >= 0) skinLibrary[existingIdx] = parsed; else skinLibrary.push(parsed);
@@ -1152,7 +1361,7 @@
         paintGallery();
         syncTweakInputs();
         renderAll();
-        skinStatus.textContent = "Imported \"" + parsed.name + "\" and applied it.";
+        skinStatus.textContent = "Imported \"" + parsed.name + "\" and applied it." + (parsed.fellBack.length ? " " + parsed.fellBack.length + " token" + (parsed.fellBack.length === 1 ? "" : "s") + " it lacked or could not use came from the base skin." : "");
         skinStatus.className = "status-msg ok";
       } catch (err){
         skinStatus.textContent = "Could not import: " + err.message;
@@ -1186,15 +1395,19 @@
   var TEST_TYPES = ["navigation", "conversation", "data-view", "panel-grid", "form"];
   function runSelfTest(){
     var results = [];
-    var skin = effectiveSkin(findSkin(state.selectedSkinId));
+    var skin = effectiveSkin(findSkin(state.selectedSkinId), state.tweaks);
     TEST_TYPES.forEach(function(type){
+      var names = Object.keys(RENDERERS[type] || {}).sort().join(",");
+      results.push({ type: type, scenario: "the renderer registry has exactly the kernel's variants", pass: names === VARIANTS[type].slice().sort().join(","), usedVariant: null, error: null });
+      results.push(runOneTest(type, "a skin with no tokens at all", function(s){ delete s.tokens; }));
+      results.push(runOneTest(type, "a colour token that would load a URL", function(s){ s.tokens.color = { light: { bg: "url(https://example.com/x.png)" }, dark: { bg: "url(https://example.com/x.png)" } }; }, function(app){ return !/url\(/i.test(app.getAttribute("style") || ""); }));
       results.push(runOneTest(type, "missing mapping", function(s){ delete s.componentMap[type]; }));
       results.push(runOneTest(type, "unknown variant name", function(s){ s.componentMap[type] = "does-not-exist-variant-" + Math.random().toString(36).slice(2,6); }));
     });
     paintSelfTest(results);
   }
-  function runOneTest(type, scenario, mutate){
-    var stripped = clone(effectiveSkin(findSkin(state.selectedSkinId)));
+  function runOneTest(type, scenario, mutate, extra){
+    var stripped = clone(effectiveSkin(findSkin(state.selectedSkinId), state.tweaks));
     mutate(stripped);
     var hidden = document.createElement("div");
     hidden.style.position = "absolute"; hidden.style.left = "-9999px"; hidden.style.top = "-9999px";
@@ -1202,9 +1415,9 @@
     document.body.appendChild(hidden);
     var pass = false, usedVariant = null, errMsg = null;
     try {
-      renderStructure(state.structure, stripped, hidden, { requestRerender: function(){}, navigate: function(){} });
+      var app = renderStructure(state.structure, stripped, hidden, { requestRerender: function(){}, navigate: function(){} });
       var compEl = hidden.querySelector('[data-component-type="' + type + '"]');
-      pass = !!compEl && compEl.textContent.trim().length > 0;
+      pass = !!compEl && compEl.textContent.trim().length > 0 && (!extra || extra(app));
       usedVariant = compEl ? compEl.getAttribute("data-variant") : null;
     } catch (e){
       errMsg = e.message;
@@ -1252,5 +1465,25 @@
   renderAll();
 })();
 </script>
+
+<style>
+  .ex p, .ex li, .ex dd{color:var(--page-text-muted);line-height:1.6}
+  .ex b{color:var(--page-text)}
+  .ex ol, .ex ul{padding-left:1.3em} .ex li{margin:.35em 0}
+  .ex dt{margin-top:10px} .ex dd{margin:4px 0 0 0}
+  .ex .ex-svg{width:100%;height:auto;margin:6px 0}
+  .ex-b{fill:none;stroke:var(--page-accent);stroke-width:1.4} .ex-t{fill:var(--page-text);font-size:12px;font-family:inherit}
+  .ex-s{fill:var(--page-text-muted);font-size:10.5px;font-family:inherit} .ex-l{stroke:var(--page-text-muted);stroke-width:1.4}
+  .ex table{border-collapse:collapse;width:100%;font-size:.9em} .ex th,.ex td{border-bottom:1px solid var(--page-border);padding:6px 8px;text-align:left}
+  .ex .ex-wrap{overflow-x:auto}
+  .ex-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 16px;margin:10px 0}
+  .ex-form label{font-size:.85em;color:var(--page-text-muted)} .ex-form input{width:100%;box-sizing:border-box;margin-top:4px;padding:6px 8px;border-radius:6px;border:1px solid var(--page-border);background:var(--page-surface);color:var(--page-text);font:inherit}
+  .ex .big{color:var(--page-text);font-weight:600}
+  .ex h4{margin:18px 0 6px;color:var(--page-text)}
+</style>
+<!-- ⟦SKINS-DATA-BEGIN⟧ generated by build.mjs from receipts/witness.json and the vendored basis -->
+<script type="application/json" id="skins-data">{"receipt":{"kind":"konomi-skins.witness","v":1,"witness":{"tag":"v0.6","commit":"f04fe3047e3d49b98c67713befd5b77182afa0d4","sha256":"9918297aa5f8fc4e1d26d9e6b25226f56102fdc04f0c634155bfcba1c086ef48"},"kernel":"kernel.mjs","kernelSha256":"648635cf2ed71393cb84b267fa3533b53a79dacbee892179b26b7e85cd56db2a","tests":"node --test kernel.test.mjs","testsSha256":"9d0221370798a4382d267b97fe5d585f1276d209d49d5f600eaa2871d1783a57","node":"v25.7.0","platform":"win32","total":87,"killed":87,"survived":[],"ignored":[],"capped":false,"timeoutMs":60000,"clean":true,"seconds":520,"rerun":"git clone https://github.com/sjgant80-hub/witness && git -C witness checkout v0.6 && node gate.mjs --witness witness/witness.mjs"},"basis":{"wageMedianHourly":{"value":19.67,"unit":"GBP per hour","what":"ONS ASHE 2025: median hourly earnings excluding overtime, full-time employees, UK","source":"https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/bulletins/annualsurveyofhoursandearnings/2025","via":"estate basis 2026-09-29"}}}</script>
+<!-- ⟦SKINS-DATA-END⟧ -->
+<script type="module" src="explain-skins.mjs"></script>
 </body>
 </html>
