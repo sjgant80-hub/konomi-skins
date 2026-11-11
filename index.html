@@ -424,7 +424,7 @@
   <section id="how"><h3>How it works <small>from a skin to a rendered app</small></h3><div class="card ex">
     <svg class="ex-svg" viewBox="0 0 646 98" role="img" aria-label="STRUCTURE what the app is, then SKIN yours, or imported, then fitted onto the base skin, then RENDERER always draws"><rect x="6" y="12" width="144" height="74" rx="8" class="ex-b"/><text x="78" y="42" text-anchor="middle" class="ex-t">STRUCTURE</text><text x="78" y="56" text-anchor="middle" class="ex-s">what the app is</text><line x1="150" y1="49" x2="166" y2="49" class="ex-l"/><rect x="166" y="12" width="144" height="74" rx="8" class="ex-b"/><text x="238" y="42" text-anchor="middle" class="ex-t">SKIN</text><text x="238" y="56" text-anchor="middle" class="ex-s">yours, or imported</text><line x1="310" y1="49" x2="326" y2="49" class="ex-l"/><rect x="326" y="12" width="144" height="74" rx="8" class="ex-b"/><text x="398" y="42" text-anchor="middle" class="ex-t">fitted onto</text><text x="398" y="56" text-anchor="middle" class="ex-s">the base skin</text><line x1="470" y1="49" x2="486" y2="49" class="ex-l"/><rect x="486" y="12" width="144" height="74" rx="8" class="ex-b"/><text x="558" y="42" text-anchor="middle" class="ex-t">RENDERER</text><text x="558" y="56" text-anchor="middle" class="ex-s">always draws</text></svg>
     <ol>
-      <li><b>The structure</b> lists the app's components (navigation, conversation, data view, panel grid, form), how they nest, and the flows between them: no colour, no layout.</li>
+      <li><b>The structure</b> lists the app's components, how they nest, and the flows between them: no colour, no layout. The demo has five component types, each with its own variants: <b>navigation</b> (sidebar, top bar, dock, command palette), <b>conversation</b> (bubbles, terminal, cards), <b>data view</b> (list, bars, radial, tree), <b>panel grid</b> (grid, bento, masonry, stack) and <b>form</b> (stacked, inline, card).</li>
       <li><b>The skin</b> is JSON: tokens (colours for light and dark, font, spacing, radii, shadows, motion), a layout (mode, density, navigation style, panel order) and, for each component type, which variant to draw it with.</li>
       <li><b>Fitting.</b> Before anything is drawn, the skin is fitted onto the base skin, token by token. A token is used only if it looks like its kind and cannot load anything from outside the page; otherwise the base's value is. A variant the renderer does not have becomes the base's variant.</li>
       <li><b>The renderer</b> walks the structure from its root, visiting each component once, and draws each one with the fitted skin. So every skin, including one written by a stranger, renders the whole app.</li>
@@ -437,7 +437,7 @@
     <dt><b>Token</b></dt><dd>One design value in a skin: a colour, a font, a size, a shadow, a speed.</dd>
     <dt><b>Variant</b></dt><dd>One way to draw a component type: navigation as a sidebar, a top bar, a dock or a command palette, for example.</dd>
     <dt><b>Base skin</b></dt><dd>The floor every fallback lands on. It defines every token and a variant for every type.</dd>
-    <dt><b>Fitting</b></dt><dd>Checking a skin token by token against the base before it is drawn, and taking the base's value for anything missing or unusable.</dd>
+    <dt><b>Fitting</b></dt><dd>Checking a skin token by token against the base before it is drawn, and taking the base's value for anything missing or unusable. The rules: a colour is a hex code, <code>rgb()</code>, <code>hsl()</code> or a colour name; a size is a number with px, rem, em or %; a font is a list of names; a shadow is numbers and colours; a speed is a time such as 150ms; a heading weight is 100 to 900; and no value may contain <code>url(</code>, <code>image(</code>, <code>@import</code>, <code>expression</code> or a backslash, anything that could make the page load or run something.</dd>
     <dt><b>Kernel</b></dt><dd>The small piece of code that holds the base skin, the variants and the fitting rules. It is a block inside this page, copied byte for byte into <code>kernel.mjs</code> (the file the tests run).</dd>
     <dt><b>Mutation gate</b></dt><dd>A test of the tests. <a href="https://github.com/sjgant80-hub/witness">witness</a> makes small deliberate changes to the kernel, one at a time: for example it turns <code>weight &lt;= 900</code> into <code>weight &lt; 900</code>, then runs the tests. Every change must make a test fail; a change no test notices has <i>survived</i>.</dd>
     <dt><b>CI</b></dt><dd>Continuous integration: GitHub re-runs every test and both gates on its own computers on every change, and the runs are public.</dd>
@@ -493,7 +493,7 @@
     <h4>Security, data protection and deployment</h4>
     <ul>
       <li>The page runs entirely in your browser and makes no network call; nothing you edit or import is sent anywhere.</li>
-      <li>An imported skin is data, never code: each value is checked against its kind, and anything that could load a resource is refused.</li>
+      <li>An imported skin is data, never code: each value is checked against its kind (the rules are under <a href="#ex-words">Fitting</a>), and anything that could load a resource is refused. It is read with <code>JSON.parse</code>, which cannot run anything.</li>
       <li>Serve it from GitHub Pages or your own intranet, unchanged.</li>
     </ul>
     <h4>Support and ownership</h4>
@@ -511,6 +511,9 @@
 
   <section id="ex-faq"><h3>FAQ</h3><div class="card ex"><dl>
     <dt><b>What happens to a skin I import?</b></dt><dd>It is fitted onto the base: each token is checked against its kind, and anything missing, malformed or able to load something comes from the base. The page tells you how many tokens did. Nothing is sent anywhere.</dd>
+    <dt><b>What does a skin file look like?</b></dt><dd>JSON. It only needs what it changes; the rest comes from the base. For example <code>{"id": "my-brand", "name": "My brand", "tokens": {"color": {"light": {"accent": "#0a7d5a"}}}, "layout": {"navStyle": "topbar"}, "componentMap": {"data-view": "bars"}}</code>. <b>Export current skin</b> gives you a complete one to start from.</dd>
+    <dt><b>Is fitting slow?</b></dt><dd>No: fitting one skin took about 2 microseconds (the median of 7 runs of 10,000, in Node.js on an ordinary laptop). Drawing the app is the browser's ordinary work.</dd>
+    <dt><b>Can I use it in my own product?</b></dt><dd>The demo shows the pattern on five component types. The part you would take is <code>kernel.mjs</code>: one file, MIT, no dependencies, with the base skin, the fitting rules and <code>fitSkin</code>, which works on any skin JSON. You would describe your own product as a structure and write a renderer for each of your component types.</dd>
     <dt><b>Can a skin remove a feature?</b></dt><dd>No. A component type the skin does not map, or maps to a variant the renderer does not have, is drawn with the base skin's variant.</dd>
     <dt><b>What if my structure has a mistake?</b></dt><dd>It must have a root and a list of components. A component of a type the renderer does not know is skipped; components that refer to each other in a loop are each drawn once.</dd>
     <dt><b>Does it need the internet or an account?</b></dt><dd>No. The page works once loaded and makes no network call.</dd>
