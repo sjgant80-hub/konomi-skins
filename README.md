@@ -32,4 +32,4 @@ component types and skins — not a full design system. Structure concept: **Kon
 - **The cost case** (`skincase.mjs`) has its own tests and gate; the only sourced figure is the UK median wage (ONS).
 - **No network call.** The gate line and the wage are embedded in the page at build time.
 
-Built by **Kar** (karma-didy) on the FallForge estate.
+Built by **Kar** for AI Native Solutions.
